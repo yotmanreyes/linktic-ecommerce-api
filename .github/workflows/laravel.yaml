@@ -1,0 +1,68 @@
+name: Laravel CI
+
+on:
+  push:
+    branches:
+      - main # Cambia esto según la rama que desees monitorear
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1" # Cambia según la versión de PHP que necesites
+          extensions: mbstring, xml, curl, mysql
+          ini-values: post_max_size=256M, upload_max_filesize=256M
+
+      - name: Copy .env file
+        run: |
+          cp .env.example .env
+
+      - name: Set environment variables
+        run: |
+          echo "DB_CONNECTION=mysql" >> .env
+          echo "DB_HOST=127.0.0.1" >> .env
+          echo "DB_PORT=3306" >> .env
+          echo "DB_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> .env
+          echo "DB_USERNAME=${{ secrets.MYSQL_USERNAME }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Run migrations
+        run: php artisan migrate --force
+
+      - name: Run seeders
+        run: php artisan db:seed --force
+
+      - name: Start the development server
+        run: |
+          php artisan serve --host=0.0.0.0 --port=8000 &
+
+      - name: Run tests
+        run: php artisan test
