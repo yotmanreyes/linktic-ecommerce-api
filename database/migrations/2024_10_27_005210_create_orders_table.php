@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Assuming you have a users table
             $table->decimal('total_amount', 10, 2);
             $table->enum('status', ['pending', 'completed', 'canceled', 'refunded'])->default('pending');
-            $table->string('shipping_address');
+            $table->string('shipping_address')->nullable();
             $table->string('billing_address')->nullable();
             $table->string('payment_method')->nullable(); // e.g., credit card, PayPal
             $table->timestamps();
