@@ -27,6 +27,8 @@ Route::prefix('categories')->group(function () {
     Route::post('/', [CategoryController::class, 'store']); // Create a new category
     Route::put('/{id}', [CategoryController::class, 'update']); // Update a category
     Route::delete('/{id}', [CategoryController::class, 'destroy']); // Delete a category
+
+    Route::get('/{id}/products', [ProductController::class, 'getProductsByCategory']);
 });
 
 // Order Routes

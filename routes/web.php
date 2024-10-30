@@ -14,6 +14,8 @@ use App\Http\Controllers\API\InventoryController;
 
 Route::apiResource('products', ProductController::class);
 
+Route::get('/categories/{id}/products', [ProductController::class, 'getProductsByCategory']);
+
 // Resource routes for Categories
 Route::apiResource('categories', CategoryController::class);
 
